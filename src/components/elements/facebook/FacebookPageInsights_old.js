@@ -7,7 +7,7 @@ import Facebook from './../../../services/Facebook';
 import MUIDataTable from 'mui-datatables';
 import {MuiThemeProvider, createMuiTheme} from '@material-ui/core';
 
-class FacebookPublishedPosts extends Component {
+class FacebookPageInsights extends Component {
     constructor (props) {
         super(props);
 
@@ -18,7 +18,7 @@ class FacebookPublishedPosts extends Component {
                 rowsPerPage: 50,
                 setOrder: {},
                 data: [['...Cargando información...']],
-                columns: Facebook.publishedPostsDatatableColumns
+                columns: Facebook.pageInsightsDatatableColumns
             },
             isLoading: false,
             msgFlashReadFacebook: [],
@@ -31,7 +31,7 @@ class FacebookPublishedPosts extends Component {
         this.setOrderDatatable = this.setOrderDatatable.bind(this);
         this.setPageDatatable = this.setPageDatatable.bind(this);
         this.makeFacebookBtn = this.makeFacebookBtn.bind(this);
-        this.readFacebookPublishedPosts = this.readFacebookPublishedPosts.bind(this);
+        this.readFacebookPageInsights = this.readFacebookPageInsights.bind(this);
         this.reloadDatatable = this.reloadDatatable.bind(this);
         
     }
@@ -71,31 +71,22 @@ class FacebookPublishedPosts extends Component {
             || (this.state.datatable.count > 0 && (this.state.datatable.count / this.state.datatable.rowsPerPage) >= this.state.datatable.page)
             || (this.state.datatable.count > 0 && this.state.datatable.count < this.state.datatable.rowsPerPage && this.state.datatable.page == 1)){
             this.setState({isLoading: true});
-            let publishedPostsList = await Facebook.getPublishedPostsListAdm(this.state.datatable.page, this.state.datatable.setOrder, this.props.empresaid);
-            if(publishedPostsList.status == true){
-                this.setDataDatatable(publishedPostsList.msg);
+            let pageInsightsList = await Facebook.getPageInsightsListAdm(this.state.datatable.page, this.state.datatable.setOrder, this.props.empresaid);
+            if(pageInsightsList.status == true){
+                this.setDataDatatable(pageInsightsList.msg);
             }
         }
         
         
     }
 
-    setDataDatatable (publishedPostsList) {
-        if(publishedPostsList.data.length && publishedPostsList.meta){
+    setDataDatatable (pageInsightsList) {
+        if(pageInsightsList.data.length && pageInsightsList.meta){
             let dataFinal = [];
-            dataFinal = publishedPostsList.data.map((post, index) => {
-                return {imagen: post.picture,
-                        mensaje: post.message,
-                        reach: post.reach,
-                        engagement: post.engagement,
-                        likes: post.likes,
-                        expirado: post.expired,
-                        oculto: post.hidden,
-                        popular: post.popular,
-                        publicado: post.published,
-                        tags: post.tags,
-                        insights: post.insights,
-                        fecha_creacion: post.created_time
+            dataFinal = pageInsightsList.data.map((post, index) => {
+                return {metric: post.metric,
+                        metric_date: post.metric_date,
+                        metric_value: post.metric_value
                        };
             });
 
@@ -103,9 +94,9 @@ class FacebookPublishedPosts extends Component {
             this.setState( prevState => ({
                 datatable : {
                     ...prevState.datatable, 
-                    page: publishedPostsList.meta.current_page,
-                    count: publishedPostsList.meta.total,
-                    rowsPerPage: publishedPostsList.meta.per_page,
+                    page: pageInsightsList.meta.current_page,
+                    count: pageInsightsList.meta.total,
+                    rowsPerPage: pageInsightsList.meta.per_page,
                     data: dataFinal
                 }
             }));
@@ -141,21 +132,21 @@ class FacebookPublishedPosts extends Component {
     makeFacebookBtn () {
         if(this.props.empresaid != false && this.props.empresadata.name != ''){
             return (
-                <FacebookBtn mainreadinfo={this.readFacebookPublishedPosts} empresadata={this.props.empresadata} />
+                <FacebookBtn mainreadinfo={this.readFacebookPageInsights} empresadata={this.props.empresadata} />
             );
         }else{
             return '0';
         }
     }
 
-    async readFacebookPublishedPosts(fat, ftt, fuid) {
+    async readFacebookPageInsights(fat, ftt, fuid) {
         console.log(fat);
         console.log(ftt);
         console.log(fuid);
         this.setState({isLoading: true, msgFlashReadFacebook: [], typeMsgFlashReadFb: ''},
         async function () {
             const self = this;
-            const params = {fat, ftt, fuid, emp: this.props.empresaid, process: 'publish_posts'};
+            const params = {fat, ftt, fuid, emp: this.props.empresaid, process: 'page_insights'};
             let req = await Facebook.readFacebookInfo(params);
             if(req.status == true) {
                 const {data} = req.resp_data;
@@ -240,7 +231,7 @@ class FacebookPublishedPosts extends Component {
         });
 
         return (
-            <div className="card shadow mb-4 p-3">
+            <div style={{width: '100%'}} className="card shadow mb-4 p-3">
                 {(isLoading) ? 
                 <LoadingSection />
                 : ''}
@@ -261,4 +252,4 @@ class FacebookPublishedPosts extends Component {
     }
 }
 
-export default withRouter(FacebookPublishedPosts);
+export default withRouter(FacebookPageInsights);

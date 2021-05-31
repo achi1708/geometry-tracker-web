@@ -48,20 +48,20 @@ const Facebook = {
         return {status: status, msg: msg };
     },
 
-    async getPageInsightsListAdm (page = 1, setOrder = {}, empresaId) {
+    async getPageInsightsListAdm (/*page = 1, setOrder = {},*/ empresaId) {
         let self = this;
         let status = false;
         let msg = [];
         let paramsGet = {};
         paramsGet.emp = empresaId;
-        paramsGet.page = page;
+        /*paramsGet.page = page;
         if(setOrder.name){
             paramsGet.orderCol = setOrder.name;
         }
 
         if(setOrder.direction){
             paramsGet.orderDir = setOrder.direction;
-        }
+        }*/
 
         let req = await httpInstance.get(`facebook/page_insights`, {params: paramsGet})
                     .then(function(response){
@@ -174,6 +174,27 @@ const Facebook = {
                         return('');
                     }
                 }
+            }
+        },
+        {
+            name: 'reach',
+            label: 'Reach',
+            options: {
+                sort: false
+            }
+        },
+        {
+            name: 'engagement',
+            label: 'Engagement',
+            options: {
+                sort: false
+            }
+        },
+        {
+            name: 'likes',
+            label: 'Likes',
+            options: {
+                sort: false
             }
         },
         {
