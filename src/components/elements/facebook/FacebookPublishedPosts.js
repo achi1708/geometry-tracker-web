@@ -2,7 +2,9 @@ import React, {Component} from 'react';
 import { Switch, Route, withRouter } from 'react-router-dom';
 import LoadingSection from './../LoadingSection';
 import FacebookBtn from './FacebookBtn';
+import DownloadBtn from './DownloadBtn';
 import FlashMessages from './../FlashMessages';
+import FacebookMultiAccounts from './FacebookMultiAccounts';
 import Facebook from './../../../services/Facebook';
 import MUIDataTable from 'mui-datatables';
 import {MuiThemeProvider, createMuiTheme} from '@material-ui/core';
@@ -22,7 +24,10 @@ class FacebookPublishedPosts extends Component {
             },
             isLoading: false,
             msgFlashReadFacebook: [],
-            typeMsgFlashReadFb: ''
+            typeMsgFlashReadFb: '',
+            multipleAccounts: false,
+            multipleAccountsList: [],
+            multiAccountSelected: false
 
         };
 
@@ -33,6 +38,9 @@ class FacebookPublishedPosts extends Component {
         this.makeFacebookBtn = this.makeFacebookBtn.bind(this);
         this.readFacebookPublishedPosts = this.readFacebookPublishedPosts.bind(this);
         this.reloadDatatable = this.reloadDatatable.bind(this);
+        this.makeDownloadBtn = this.makeDownloadBtn.bind(this);
+        this.downloadFacebookPublishedPosts = this.downloadFacebookPublishedPosts.bind(this);
+        this.setMultipleAccountSelected = this.setMultipleAccountSelected.bind(this);
         
     }
 
@@ -148,14 +156,27 @@ class FacebookPublishedPosts extends Component {
         }
     }
 
+    makeDownloadBtn () {
+        if(this.props.empresaid != false){
+            return (
+                <DownloadBtn mainexec={this.downloadFacebookPublishedPosts} empresadata={this.props.empresaid} />
+            );
+        }else{
+            return '0';
+        }
+    }
+
     async readFacebookPublishedPosts(fat, ftt, fuid) {
         console.log(fat);
         console.log(ftt);
         console.log(fuid);
-        this.setState({isLoading: true, msgFlashReadFacebook: [], typeMsgFlashReadFb: ''},
+        this.setState({isLoading: true, msgFlashReadFacebook: [], typeMsgFlashReadFb: '', multipleAccountsList: [], multipleAccounts: false},
         async function () {
             const self = this;
             const params = {fat, ftt, fuid, emp: this.props.empresaid, process: 'publish_posts'};
+            if(this.state.multiAccountSelected !== false){
+                params.account_id_select = this.state.multiAccountSelected;
+            }
             let req = await Facebook.readFacebookInfo(params);
             if(req.status == true) {
                 const {data} = req.resp_data;
@@ -166,6 +187,11 @@ class FacebookPublishedPosts extends Component {
                     });
 
                     let timer = setTimeout(() => self.reloadDatatable(), 1500);
+                }else if(data.msg == 'MULTIPLE_ACCOUNTS'){
+                    this.setState({
+                        multipleAccountsList: data.msg_extra,
+                        multipleAccounts: true
+                    });
                 }
                 
             }else{
@@ -174,14 +200,35 @@ class FacebookPublishedPosts extends Component {
                     typeMsgFlashReadFb: 'danger'
                 });
             }
+            this.setState({isLoading: false, multiAccountSelected: false});
+        }.bind(this));
+    }
+
+    async downloadFacebookPublishedPosts () {
+        this.setState({isLoading: true},
+        async function () {
+            const self = this;
+            let req = await Facebook.downloadFacebookInfo(this.props.empresaid, 'export_published_posts');
+            if(req.status == true) {
+                const link = document.createElement('a');
+                link.href = req.resp_data;
+                link.setAttribute('download', 'publish_posts.xlsx');
+                document.body.appendChild(link);
+                link.click();
+            }
             this.setState({isLoading: false});
         }.bind(this));
+    }
+
+    setMultipleAccountSelected (accountSelected) {
+        this.setState({multiAccountSelected: accountSelected});
     }
 
     render () {
         const { data, page, count, rowsPerPage, sortOrder } = this.state.datatable;
         const {isLoading} = this.state;
         const fbBtn = this.makeFacebookBtn();
+        const dwldBtn = this.makeDownloadBtn();
         
 
         const options = {
@@ -244,9 +291,20 @@ class FacebookPublishedPosts extends Component {
                 {(isLoading) ? 
                 <LoadingSection />
                 : ''}
-                {fbBtn}
+                <div className="row">
+                    <div className="col-xl-6 col-lg-6">
+                        {fbBtn}
+                    </div>
+                    <div className="col-xl-6 col-lg-6">
+                        {dwldBtn}
+                    </div>
+                </div>
                 { this.state.msgFlashReadFacebook.length > 0 ?
                     <FlashMessages messages={this.state.msgFlashReadFacebook} type={this.state.typeMsgFlashReadFb} /> :
+                    ''
+                }
+                { this.state.multipleAccounts ?
+                    <FacebookMultiAccounts callback={this.setMultipleAccountSelected} accounts={this.state.multipleAccountsList} /> :
                     ''
                 }
                 <MuiThemeProvider theme={theme}>

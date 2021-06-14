@@ -1,11 +1,10 @@
 import React, {Component} from 'react';
 import { Switch, Route, withRouter } from 'react-router-dom';
 import {Tabs, Tab, AppBar} from '@material-ui/core'
-import FacebookPublishedPosts from './FacebookPublishedPosts';
-import FacebookPageInsights from './FacebookPageInsights';
-import FacebookAdsRoute from './FacebookAdsRoute';
+/*import FacebookPublishedPosts from './FacebookPublishedPosts';
+import FacebookPageInsights from './FacebookPageInsights';*/
 
-class EmpresasFacebookTabs extends Component {
+class EmpresasInstagramTabs extends Component {
     constructor (props) {
         super(props);
 
@@ -13,13 +12,11 @@ class EmpresasFacebookTabs extends Component {
             selectedTabIndex: 0,
             tabNameToIndex: {
                 "publish_post": 0,
-                "insights": 1,
-                "ads": 2
+                //"insights": 1
             },
             indexTotabName: {
                 0: "publish_post",
-                1: "insights",
-                2: "ads"
+                //1: "insights"
             }
         }
 
@@ -50,16 +47,12 @@ class EmpresasFacebookTabs extends Component {
                 <AppBar position="static">
                     <Tabs value={this.state.selectedTabIndex} onChange={this.handleChange}>
                         <Tab label="Published Posts" />
-                        <Tab label="Page Insights" />
-                        <Tab label="Ads" />
                     </Tabs>
                 </AppBar>
-                {this.state.selectedTabIndex === 0 && <FacebookPublishedPosts empresaid={this.props.empresaid} empresadata={this.props.empresadata} userdata={this.props.userdata} />}
-                {this.state.selectedTabIndex === 1 && <FacebookPageInsights empresaid={this.props.empresaid} empresadata={this.props.empresadata} userdata={this.props.userdata} />}
-                {this.state.selectedTabIndex === 2 && <FacebookAdsRoute empresaid={this.props.empresaid} empresadata={this.props.empresadata} userdata={this.props.userdata} />}
+                {this.state.selectedTabIndex === 0 && 'Heyy Instagram'}
             </>
         )
     }
 }
 
-export default withRouter(EmpresasFacebookTabs);
+export default withRouter(EmpresasInstagramTabs);

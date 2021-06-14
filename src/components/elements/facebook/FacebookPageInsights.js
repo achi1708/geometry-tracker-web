@@ -2,7 +2,9 @@ import React, {Component} from 'react';
 import { Switch, Route, withRouter } from 'react-router-dom';
 import LoadingSection from './../LoadingSection';
 import FacebookBtn from './FacebookBtn';
+import DownloadBtn from './DownloadBtn';
 import FlashMessages from './../FlashMessages';
+import FacebookMultiAccounts from './FacebookMultiAccounts';
 import Facebook from './../../../services/Facebook';
 import { Line, Bar } from 'react-chartjs-2';
 
@@ -16,7 +18,10 @@ class FacebookPageInsights extends Component {
             multipleBarChartsData: [],
             isLoading: false,
             msgFlashReadFacebook: [],
-            typeMsgFlashReadFb: ''
+            typeMsgFlashReadFb: '',
+            multipleAccounts: false,
+            multipleAccountsList: [],
+            multiAccountSelected: false
 
         };
 
@@ -25,6 +30,10 @@ class FacebookPageInsights extends Component {
         this.setLineChartsData = this.setLineChartsData.bind(this);
         this.makeFacebookBtn = this.makeFacebookBtn.bind(this);
         this.readFacebookPageInsights = this.readFacebookPageInsights.bind(this);
+        this.makeDownloadBtn = this.makeDownloadBtn.bind(this);
+        this.downloadFacebookPageInsights = this.downloadFacebookPageInsights.bind(this);
+        this.setMultipleAccountSelected = this.setMultipleAccountSelected.bind(this);
+        
     }
 
     componentDidMount () {
@@ -185,14 +194,27 @@ class FacebookPageInsights extends Component {
         }
     }
 
+    makeDownloadBtn () {
+        if(this.props.empresaid != false){
+            return (
+                <DownloadBtn mainexec={this.downloadFacebookPageInsights} empresadata={this.props.empresaid} />
+            );
+        }else{
+            return '0';
+        }
+    }
+
     async readFacebookPageInsights(fat, ftt, fuid) {
         console.log(fat);
         console.log(ftt);
         console.log(fuid);
-        this.setState({isLoading: true, msgFlashReadFacebook: [], typeMsgFlashReadFb: ''},
+        this.setState({isLoading: true, msgFlashReadFacebook: [], typeMsgFlashReadFb: '', multipleAccountsList: [], multipleAccounts: false},
         async function () {
             const self = this;
             const params = {fat, ftt, fuid, emp: this.props.empresaid, process: 'page_insights'};
+            if(this.state.multiAccountSelected !== false){
+                params.account_id_select = this.state.multiAccountSelected;
+            }
             let req = await Facebook.readFacebookInfo(params);
             if(req.status == true) {
                 const {data} = req.resp_data;
@@ -203,6 +225,11 @@ class FacebookPageInsights extends Component {
                     });
 
                     let timer = setTimeout(() => self.getData(), 1500);
+                }else if(data.msg == 'MULTIPLE_ACCOUNTS'){
+                    this.setState({
+                        multipleAccountsList: data.msg_extra,
+                        multipleAccounts: true
+                    });
                 }
                 
             }else{
@@ -211,14 +238,35 @@ class FacebookPageInsights extends Component {
                     typeMsgFlashReadFb: 'danger'
                 });
             }
+            this.setState({isLoading: false, multiAccountSelected: false});
+        }.bind(this));
+    }
+
+    async downloadFacebookPageInsights () {
+        this.setState({isLoading: true},
+        async function () {
+            const self = this;
+            let req = await Facebook.downloadFacebookInfo(this.props.empresaid, 'export_page_insights');
+            if(req.status == true) {
+                const link = document.createElement('a');
+                link.href = req.resp_data;
+                link.setAttribute('download', 'page_insights.xlsx');
+                document.body.appendChild(link);
+                link.click();
+            }
             this.setState({isLoading: false});
         }.bind(this));
+    }
+
+    setMultipleAccountSelected (accountSelected) {
+        this.setState({multiAccountSelected: accountSelected});
     }
 
     render () {
 
         const {isLoading, lineChartsData, multipleBarChartsData} = this.state;
         const fbBtn = this.makeFacebookBtn();
+        const dwldBtn = this.makeDownloadBtn();
         const options = {
             scales: {
               yAxes: [
@@ -275,9 +323,20 @@ class FacebookPageInsights extends Component {
                 {(isLoading) ? 
                 <LoadingSection />
                 : ''}
-                {fbBtn}
+                <div className="row">
+                    <div className="col-xl-6 col-lg-6">
+                        {fbBtn}
+                    </div>
+                    <div className="col-xl-6 col-lg-6">
+                        {dwldBtn}
+                    </div>
+                </div>
                 { this.state.msgFlashReadFacebook.length > 0 ?
                     <FlashMessages messages={this.state.msgFlashReadFacebook} type={this.state.typeMsgFlashReadFb} /> :
+                    ''
+                }
+                { this.state.multipleAccounts ?
+                    <FacebookMultiAccounts callback={this.setMultipleAccountSelected} accounts={this.state.multipleAccountsList} /> :
                     ''
                 }<br />
                 <div className="row">

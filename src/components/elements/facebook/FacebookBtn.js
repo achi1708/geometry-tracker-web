@@ -37,7 +37,7 @@ class FacebookBtn extends Component {
                     }else{
                         alert("No se cuenta con el acceso correcto al usuario de Facebook que administra esta empresa");
                     }
-                }, {scope: 'email,read_insights,ads_management,ads_read,business_management'});
+                }, {scope: 'email,read_insights,pages_show_list,ads_management,ads_read,business_management,instagram_basic,instagram_manage_insights,pages_read_engagement,pages_read_user_content'});
             }
         }
     }
