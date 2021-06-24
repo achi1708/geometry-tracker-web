@@ -56,7 +56,7 @@ class Empresas extends Component {
                     'Error de acceso'
                     }
                 </Route>
-                <Route path={`${path}/instragram/:empresaId`}>
+                <Route path={`${path}/instagram/:empresaId`}>
                     {this.props.userdata.access ?
                         (this.props.userdata.access.includes('empresas.data_social_media')) ?
                         <EmpresasInstagram userdata={this.props.userdata} />

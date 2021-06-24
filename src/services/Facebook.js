@@ -1,6 +1,7 @@
 import httpInstance from './Apiservice';
 import FacebookMessageLinkModal from './../components/elements/facebook/FacebookMessageLinkModal';
 import FacebookInsightsLinkModal from './../components/elements/facebook/FacebookInsightsLinkModal';
+import FacebookAdsInsightsLinkModal from './../components/elements/facebook/FacebookAdsInsightsLinkModal';
 import {Link} from 'react-router-dom';
 
 const Facebook = {
@@ -606,7 +607,7 @@ const Facebook = {
                         if(value.length > 0){
                             return (
                                 <div>
-                                   <a key={tableMeta.rowIndex}>Ver Insights</a>
+                                   <FacebookAdsInsightsLinkModal key={tableMeta.rowIndex} insights={value} />
                                 </div>
                             );
                         }else{

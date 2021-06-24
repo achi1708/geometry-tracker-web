@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import { Switch, Route, withRouter } from 'react-router-dom';
 import {Tabs, Tab, AppBar} from '@material-ui/core'
-/*import FacebookPublishedPosts from './FacebookPublishedPosts';
-import FacebookPageInsights from './FacebookPageInsights';*/
+import InstagramMedia from './InstagramMedia';
+/*import FacebookPageInsights from './FacebookPageInsights';*/
 
 class EmpresasInstagramTabs extends Component {
     constructor (props) {
@@ -49,7 +49,7 @@ class EmpresasInstagramTabs extends Component {
                         <Tab label="Published Posts" />
                     </Tabs>
                 </AppBar>
-                {this.state.selectedTabIndex === 0 && 'Heyy Instagram'}
+                {this.state.selectedTabIndex === 0 && <InstagramMedia empresaid={this.props.empresaid} empresadata={this.props.empresadata} userdata={this.props.userdata} />}
             </>
         )
     }

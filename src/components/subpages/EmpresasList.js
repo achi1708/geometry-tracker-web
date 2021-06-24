@@ -35,6 +35,7 @@ class EmpresasList extends Component {
     render () {
 
         var self = this;
+        const {isLoading} = this.state;
 
         var empListRender = this.state.data.map(function(empresa, index){
             return (
@@ -47,7 +48,9 @@ class EmpresasList extends Component {
         return (
             <div className="container-fluid">
                 <PageHeading headingtxt="Empresas" />
-
+                {(isLoading) ? 
+                <LoadingSection />
+                : ''}
                 <div className="row">
                     {empListRender}
                 </div>

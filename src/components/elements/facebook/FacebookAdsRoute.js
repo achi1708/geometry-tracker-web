@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { Switch, Route, withRouter, Redirect } from 'react-router-dom';
 import FacebookBtn from './FacebookBtn';
+import DownloadBtn from './DownloadBtn';
 import LoadingSection from './../LoadingSection';
 import FlashMessages from './../FlashMessages';
 import FacebookAdAccounts from './FacebookAdAccounts';
@@ -21,6 +22,8 @@ class FacebookAdsRoute extends Component {
 
         this.makeFacebookBtn = this.makeFacebookBtn.bind(this);
         this.readFacebookAds = this.readFacebookAds.bind(this);
+        this.makeDownloadBtn = this.makeDownloadBtn.bind(this);
+        this.downloadFacebookAds = this.downloadFacebookAds.bind(this);
         this.reloadTab = this.reloadTab.bind(this);
     }
     componentDidMount () {
@@ -28,7 +31,7 @@ class FacebookAdsRoute extends Component {
     }
 
     reloadTab (){
-        alert("recargue ventana");
+        //alert("recargue ventana");
     }
 
     makeFacebookBtn () {
@@ -71,9 +74,36 @@ class FacebookAdsRoute extends Component {
         }.bind(this));
     }
 
+    makeDownloadBtn () {
+        if(this.props.empresaid != false){
+            return (
+                <DownloadBtn mainexec={this.downloadFacebookAds} empresadata={this.props.empresaid} />
+            );
+        }else{
+            return '0';
+        }
+    }
+
+    async downloadFacebookAds () {
+        this.setState({isLoading: true},
+        async function () {
+            const self = this;
+            let req = await Facebook.downloadFacebookInfo(this.props.empresaid, 'export_ads');
+            if(req.status == true) {
+                const link = document.createElement('a');
+                link.href = req.resp_data;
+                link.setAttribute('download', 'business_ads.xlsx');
+                document.body.appendChild(link);
+                link.click();
+            }
+            this.setState({isLoading: false});
+        }.bind(this));
+    }
+
     render () {
         let {path, url} = this.props.match;
         const fbBtn = this.makeFacebookBtn();
+        const dwldBtn = this.makeDownloadBtn();
         const {isLoading} = this.state;
 
         return (
@@ -81,7 +111,14 @@ class FacebookAdsRoute extends Component {
                 {(isLoading) ? 
                 <LoadingSection />
                 : ''}
-                {fbBtn}
+                <div className="row">
+                    <div className="col-xl-6 col-lg-6">
+                        {fbBtn}
+                    </div>
+                    <div className="col-xl-6 col-lg-6">
+                        {dwldBtn}
+                    </div>
+                </div>
                 { this.state.msgFlashReadFacebook.length > 0 ?
                     <FlashMessages messages={this.state.msgFlashReadFacebook} type={this.state.typeMsgFlashReadFb} /> :
                     ''
